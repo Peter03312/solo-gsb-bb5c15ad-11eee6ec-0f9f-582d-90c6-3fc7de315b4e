@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>岗位确认 · 小剧场提示单</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">📟 <a href="/">小剧场演出提示单</a> · 岗位端</div>
+    <div id="wsStatus" class="ws-status"><span class="dot"></span><span>未连接</span></div>
+  </header>
+
+  <!-- 登录区 -->
+  <main id="loginView" class="login-wrap">
+    <div class="panel">
+      <h1>岗位进入当场</h1>
+      <p class="sub">输入导演提供的场次入场码，选择本岗位并输入专属口令。口令错误或岗位不属于本场版本将被明确拒绝。</p>
+
+      <div id="stepEntry">
+        <label>场次入场码</label>
+        <input id="codeInput" maxlength="6" placeholder="例如 A7K2MP" autocomplete="off" style="text-transform:uppercase;letter-spacing:3px;font-weight:700" />
+        <div style="margin-top:16px">
+          <button class="btn-primary" id="entryBtn" style="width:100%">下一步</button>
+        </div>
+      </div>
+
+      <div id="stepLogin" class="hidden">
+        <div class="list-item" style="margin:12px 0">
+          <div>
+            <div id="showLabel" style="font-weight:700"></div>
+            <div class="meta" id="showMeta"></div>
+          </div>
+          <div class="code-box" id="showCode"></div>
+        </div>
+        <label>本岗位</label>
+        <select id="positionSelect"></select>
+        <label>岗位专属口令</label>
+        <input id="passwordInput" type="password" autocomplete="current-password" />
+        <div class="row" style="margin-top:16px">
+          <button id="backBtn" class="btn-ghost">返回</button>
+          <button class="btn-primary" id="loginBtn" style="flex:1">进入当场</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 当场页面 -->
+  <main id="showView" class="hidden">
+    <div class="panel">
+      <div class="station-header">
+        <div>
+          <h2 id="headerTitle"></h2>
+          <p class="sub" id="headerMeta" style="margin-bottom:0"></p>
+        </div>
+        <div class="right">
+          <div id="headerTags"></div>
+          <button id="logoutBtn" class="btn-sm btn-ghost" style="margin-top:8px">退出岗位</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2>提示项（按顺序执行）</h2>
+        <p class="sub">前一项全部岗位确认完成后，才能确认下一项；重复提交只保留一次。以服务端记录为准。</p>
+        <div id="cueList" class="cue-list"></div>
+      </div>
+      <div class="panel">
+        <h2>场内事件顺序</h2>
+        <p class="sub">所有确认与完成事件均由服务端统一编号，断线重连后与此处一致。</p>
+        <div id="eventLog" class="event-log"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+  <script src="/show.js"></script>
+</body>
+</html>

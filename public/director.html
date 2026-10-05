@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>导演工作台 · 小剧场提示单</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">🎬 <a href="/">小剧场演出提示单</a> · 导演台</div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div id="wsStatus" class="ws-status hidden"><span class="dot"></span><span>未连接</span></div>
+      <button id="logoutBtn" class="btn-sm btn-ghost hidden">退出</button>
+    </div>
+  </header>
+
+  <!-- 登录 -->
+  <main id="loginView" class="login-wrap">
+    <div class="panel">
+      <h1>导演登录</h1>
+      <p class="sub">默认口令为 <code class="mono">director</code>（可用环境变量 DIRECTOR_PASSWORD 修改），登录后可在“设置”中修改。</p>
+      <label>导演口令</label>
+      <input id="passwordInput" type="password" autocomplete="current-password" />
+      <div style="margin-top:16px">
+        <button class="btn-primary" id="loginBtn" style="width:100%">登录</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 工作台 -->
+  <main id="appView" class="hidden">
+    <div class="tabs" id="tabs">
+      <button data-tab="draft" class="active">① 提示项草稿</button>
+      <button data-tab="versions">② 版本发布</button>
+      <button data-tab="shows">③ 场次与开场</button>
+      <button data-tab="positions">④ 岗位与口令</button>
+      <button data-tab="settings">⑤ 设置</button>
+    </div>
+
+    <!-- 草稿 -->
+    <section data-pane="draft">
+      <div class="panel">
+        <h2>提示项草稿（按顺序排列）</h2>
+        <p class="sub">每条提示项指定一个或多个岗位。可调整顺序、增删改；这些编辑不影响已经开场的演出。编辑满意后到“版本发布”冻结为不可变版本。</p>
+        <div id="draftList" class="list"></div>
+        <h3 class="section-label">新增提示项</h3>
+        <div class="panel" style="background:var(--panel-2);margin:0">
+          <label>提示内容（演员台词 / 灯光音响切换 / 换景等）</label>
+          <input id="cueTitle" maxlength="120" placeholder="例如：第三场结束，渐暗灯光，播放雷雨音效" />
+          <label>备注（可选）</label>
+          <textarea id="cueNote" rows="2" placeholder="执行要点、时长等"></textarea>
+          <label>指定岗位（至少一个，可多选）</label>
+          <div id="cuePositions" class="checkbox-row"></div>
+          <div style="margin-top:14px"><button class="btn-primary" id="addCueBtn">追加到草稿末尾</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 版本 -->
+    <section data-pane="versions" class="hidden">
+      <div class="panel">
+        <h2>已发布版本（不可变）</h2>
+        <p class="sub">发布即对当前草稿拍照冻结：之后再改草稿不会改变任何已发布版本；已被场次选用的版本永久保留。</p>
+        <div class="row">
+          <div style="flex:3">
+            <label>发布备注（可选）</label>
+            <input id="versionNote" placeholder="例如：首映场修订，增加谢幕灯光提示" />
+          </div>
+          <div class="auto">
+            <button class="btn-primary" id="publishBtn">📌 发布当前草稿为新版本</button>
+          </div>
+        </div>
+        <div id="versionList" class="list" style="margin-top:16px"></div>
+      </div>
+    </section>
+
+    <!-- 场次 -->
+    <section data-pane="shows" class="hidden">
+      <div class="panel">
+        <h2>开场演出</h2>
+        <p class="sub">每场演出选定一个版本开场；开场后该场提示项即被固定，草稿与新版本均不影响本场。</p>
+        <div class="row">
+          <div style="flex:2">
+            <label>选定版本</label>
+            <select id="openVersionSelect"></select>
+          </div>
+          <div style="flex:2">
+            <label>场次名称（可选）</label>
+            <input id="openShowLabel" placeholder="例如：10月5日 晚场" />
+          </div>
+          <div class="auto">
+            <button class="btn-primary" id="openShowBtn">🎭 开场</button>
+          </div>
+        </div>
+      </div>
+      <div id="showsList"></div>
+    </section>
+
+    <!-- 岗位 -->
+    <section data-pane="positions" class="hidden">
+      <div class="panel">
+        <h2>岗位与专属口令</h2>
+        <p class="sub">岗位凭专属口令进入当场页面，只能确认分配给自己的提示项。修改岗位名称会影响草稿及之后发布的版本，不改变已发布版本中的名称快照。</p>
+        <div class="row">
+          <div style="flex:1">
+            <label>岗位名称</label>
+            <input id="posName" placeholder="例如：灯光 / 音响 / 舞台监督" maxlength="40" />
+          </div>
+          <div style="flex:1">
+            <label>专属口令</label>
+            <input id="posPassword" type="text" placeholder="该岗位登录口令（≥4 位）" />
+          </div>
+          <div class="auto">
+            <button class="btn-primary" id="addPosBtn">新增岗位</button>
+          </div>
+        </div>
+        <div id="positionList" class="list" style="margin-top:16px"></div>
+      </div>
+    </section>
+
+    <!-- 设置 -->
+    <section data-pane="settings" class="hidden">
+      <div class="panel" style="max-width:520px">
+        <h2>修改导演口令</h2>
+        <p class="sub">下次登录导演台时使用新口令；已登录会话不受影响。</p>
+        <label>新导演口令（≥4 位）</label>
+        <input id="newDirectorPassword" type="text" />
+        <div style="margin-top:14px"><button class="btn-primary" id="changePwdBtn">保存新口令</button></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+  <script src="/director.js"></script>
+</body>
+</html>

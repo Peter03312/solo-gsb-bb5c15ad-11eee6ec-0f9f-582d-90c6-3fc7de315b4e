@@ -1,0 +1,25 @@
+services:
+  cue-sheet:
+    build: .
+    image: backstage-cue-sheet:latest
+    container_name: backstage-cue-sheet
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # 导演首次登录口令（之后可在导演台“设置”中修改，以数据库为准）
+      DIRECTOR_PASSWORD: "director"
+      PORT: "8080"
+      DB_PATH: "/data/cues.db"
+    volumes:
+      # SQLite 数据持久化；首次启动自动建库建表
+      - cue-data:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  cue-data:
